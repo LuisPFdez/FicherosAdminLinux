@@ -1,0 +1,9 @@
+[Unit]
+Description=Temporizador para el servicio vaciadoTmp
+
+[Timer]
+OnCalendar=*-*-* *:00/10:05
+Unit=vaciadoTmp.service
+
+[Install]
+WantedBy = timers.target

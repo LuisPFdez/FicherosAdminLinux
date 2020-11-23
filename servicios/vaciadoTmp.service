@@ -1,0 +1,9 @@
+[Unit]
+Description=Servicio encargado de ejecutar un script para vaciar el tmp de apache
+
+[Service]
+Type=simple
+user=rooExecStart =/usr/local/bin/tmpVaciado.sh holaCaracola
+ExecStart =/usr/bin/tmpVaciado holaCaracola
+[Install]
+WantedBy=multi-user.target
