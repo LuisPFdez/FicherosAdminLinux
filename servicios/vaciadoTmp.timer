@@ -1,9 +1,10 @@
+#Timer para el servicio vaciadoTmp
 [Unit]
 Description=Temporizador para el servicio vaciadoTmp
 
 [Timer]
-OnCalendar=*-*-* *:00/10:05
-Unit=vaciadoTmp.service
+OnCalendar=*-*-* *:00/10:00 #Establece el tiempo de ejecucion cada 10 minutos
+Unit=vaciadoTmp.service #Servicio con el que trabajará
 
 [Install]
-WantedBy = timers.target
+WantedBy = timers.target #Establece el modo de operacion bajo el cual el servicio tiene que ser iniciado

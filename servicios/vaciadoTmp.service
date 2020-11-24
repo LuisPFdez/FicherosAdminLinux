@@ -1,9 +1,11 @@
+#Servicio que se encarga de llamar a un script para vaciar la carpeta tmp
 [Unit]
 Description=Servicio encargado de ejecutar un script para vaciar el tmp de apache
 
 [Service]
-Type=simple
-user=rooExecStart =/usr/local/bin/tmpVaciado.sh holaCaracola
-ExecStart =/usr/bin/tmpVaciado holaCaracola
+Type=simple #Estableco el tipo en simple, para que unicamente se execute al iniciar el servicio 
+User=OperadorWeb #Usuario con el que se ejecutara el servicio
+ExecStart =/usr/bin/tmpVaciado #Script que ejecuta en el inicio 
+
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target #Objetivo es multiusuario
