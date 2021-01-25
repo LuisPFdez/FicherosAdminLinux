@@ -1,6 +1,6 @@
 #!/bin/bash
 if [[ $(id -u) -eq 0 ]]; then
-	php --version > /dev/null
+	php --version 2> /dev/null
 	if [[ $? -ne 0 ]]; then
 		echo "PHP no esta instalado, instalando PHP 7.4"
 		apt update > /dev/null 2&>1
