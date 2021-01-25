@@ -3,6 +3,7 @@ if [[ $(id -u) -eq 0 ]]; then
 	php --version > /dev/null
 	if [[ $? -ne 0 ]]; then
 		echo "PHP no esta instalado, instalando PHP 7.4"
+		apt update > /dev/null
 		apt install php7.4 > /dev/null
 	fi
 	if [[ $(php -m | grep "SimpleXML" | wc -l) -eq 0 ]]; then
