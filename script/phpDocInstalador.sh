@@ -10,7 +10,7 @@ if [[ $(id -u) -eq 0 ]]; then
 	fi
 	if [[ $(php -m | grep "SimpleXML" | wc -l) -eq 0 ]]; then
 		echo "Descargando el modulo xml para php"
-		if [[ $actualizado -eq 0 ]] && apt update
+		[[ $actualizado -eq 0 ]] && apt update
 		apt install php-xml -y 
 	fi
 	phpenmod xml
