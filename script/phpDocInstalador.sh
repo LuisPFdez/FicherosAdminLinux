@@ -13,7 +13,7 @@ if [[ $(id -u) -eq 0 ]]; then
 	phpenmod xml
 	if [[ ! -f ./phpDocumentor.phar ]]; then
 		echo "Descargando phpDocumentor"
-		curl -L -O https://github.com/phpDocumentor/phpDocumentor/releases/download/v3.0.0/phpDocumentor.phar > /dev/null 2&>1
+		curl -L -O https://github.com/phpDocumentor/phpDocumentor/releases/download/v3.0.0/phpDocumentor.phar 2> /dev/null 
 	fi
 	chmod +x phpDocumentor.phar
 	mv phpDocumentor.phar /usr/local/bin/phpDoc
