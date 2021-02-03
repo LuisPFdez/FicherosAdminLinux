@@ -22,12 +22,12 @@ if [[ $# -ge 1 && $(id -u) -eq 0 ]]; then
 	openssl req -new -key ${nombre}.key > ${nombre}.csr 
 	echo "Generando crt"
 	openssl x509 -req -days $dias -in ${nombre}.csr -signkey ${nombre}.key > ${nombre}.crt 2> /dev/null
-	if [[ -f /etc/ssl/private/${nombre}.key ]]; then
+	if [[ ! -f /etc/ssl/private/${nombre}.key ]]; then 
 		cp ${nombre}.key /etc/ssl/private/${nombre}.key
 		chown root:ssl-cert /etc/ssl/private/${nombre}.key
 		chmod 640 /etc/ssl/private/${nombre}.key
 	fi
-	if [[ -f /etc/ssl/certs/${nombre}.crt ]]; then
+	if [[ !  -f /etc/ssl/certs/${nombre}.crt ]]; then
 		cp ${nombre}.crt /etc/ssl/certs/${nombre}.crt 
 		chown root:root /etc/ssl/certs/${nombre}.crt
 	fi
