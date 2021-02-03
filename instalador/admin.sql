@@ -1,0 +1,3 @@
+CREATE USER 'adminsql'@'%' IDENTIFIED BY 'P@ssw0rd';
+GRANT ALL PRIVILEGES ON *.* TO 'adminsql'@'%' WITH GRANT OPTION;
+
