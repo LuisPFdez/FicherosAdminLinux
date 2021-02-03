@@ -8,7 +8,7 @@ if [[ $(id -u) -eq 0 ]]; then
 			useradd -s /bin/bash --no-create-home -G www-data -d /var/www/html operadorweb
 			echo operadorweb:paso | chpasswd
 		fi
-		chowm -R operadorweb:www-data /var/www/html
+		chown -R operadorweb:www-data /var/www/html
 		chmod -R 2775 /var/www/html
 	fi
 	php --version 2> /dev/null
@@ -16,20 +16,20 @@ if [[ $(id -u) -eq 0 ]]; then
 		apt install php7.4 -y			
 	fi
 	if [[ $( php -m | grep "xdebug" | wc -l ) -eq 0 ]]; then
-		apt install php-xdebug
+		apt install php-xdebug -y
 		mv ./xdebug.ini /etc/php/7.4/mods-available
 	fi	
 	mysql --version
 	if [[ $? -ne 0 ]]; then
 		apt install mysql-server-8.0 -y 
-		apt install phpmyadmin php-mbstring
+		apt install phpmyadmin php-mbstring -y
 		mysql_secure_installation
 		mysql < ./admin.sql
 		sed -i 's/^bind-address/#bind-address/'/etc/mysql/mysql.conf.d/mysqld.cnf
 	fi
 	 named -v 2> /dev/null
 	if [[ $? -ne 0 ]]; then
-		apt install bind9 
+		apt install bind9 -y
 	fi
 	
 else
