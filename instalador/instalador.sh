@@ -25,7 +25,7 @@ if [[ $(id -u) -eq 0 ]]; then
 		apt install phpmyadmin php-mbstring -y
 		mysql_secure_installation
 		mysql < ./admin.sql
-		sed -i 's/^bind-address/#bind-address/'/etc/mysql/mysql.conf.d/mysqld.cnf
+		sed -i 's/^bind-address/#bind-address/' /etc/mysql/mysql.conf.d/mysqld.cnf
 	fi
 	 named -v 2> /dev/null
 	if [[ $? -ne 0 ]]; then
