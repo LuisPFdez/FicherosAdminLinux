@@ -14,10 +14,10 @@ Conjunto de script, servicios y ficheros de configuración para linux
 ## Instalador 
 ### Permite creación y configuración rápida de un servidor
 Crea el usuario **operadorweb** e instala: 
-	* Apache2 
-	* php7.4
-	* xdebug
-	* mysql
-	* phpmyadmin
-	* bind9
+* Apache2 
+* php7.4
+* xdebug
+* mysql
+* phpmyadmin
+* bind9
 **Para mysql un usuario con todos los permisos y opción de grant**
