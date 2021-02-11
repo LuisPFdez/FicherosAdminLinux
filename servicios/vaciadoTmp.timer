@@ -3,7 +3,7 @@
 Description=Temporizador para el servicio vaciadoTmp
 
 [Timer]
-OnCalendar=*-*-* *:00/10:00 #Establece el tiempo de ejecucion cada 10 minutos
+OnCalendar=*-*-* */1:00:00 #Establece el tiempo de ejecucion cada hora
 Unit=vaciadoTmp.service #Servicio con el que trabajará
 
 [Install]
