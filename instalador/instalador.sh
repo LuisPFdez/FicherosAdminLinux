@@ -17,7 +17,7 @@ if [[ $(id -u) -eq 0 ]]; then
 	fi
 	if [[ $( php -m | grep "xdebug" | wc -l ) -eq 0 ]]; then
 		apt install php-xdebug -y
-		mv ./xdebug.ini /etc/php/7.4/mods-available
+		cp ./xdebug.ini /etc/php/7.4/mods-available
 	fi	
 	mysql --version
 	if [[ $? -ne 0 ]]; then
@@ -25,7 +25,7 @@ if [[ $(id -u) -eq 0 ]]; then
 		apt install phpmyadmin php-mbstring -y
 		mysql_secure_installation
 		mysql < ./admin.sql
-		sed -i 's/^bind-address/#bind-address/'/etc/mysql/mysql.conf.d/mysqld.cnf
+		sed -i 's/^bind-address/#bind-address/' /etc/mysql/mysql.conf.d/mysqld.cnf
 	fi
 	 named -v 2> /dev/null
 	if [[ $? -ne 0 ]]; then
