@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import subprocess, os, json
+import subprocess, os, json, sys
 #La clase colores permitira mostrar mensajes mas personalizados
 class Colores:
     ROJO = '\033[31m'
@@ -77,18 +77,23 @@ def comandos(comando):
 
 
 if __name__ == "__main__":
+    archivos = ["config.json"] #Por defecto el archivo de configuarion es config.json
     if os.geteuid() != 0: #Comprueba si el script se esta ejecutando como super usuario, en caso de que el uid no sea 0
         print("Tienes que ser super usuario")#Muestra un mensaje
         exit(1)#Sale con el codigo de error 1
-
-    try:
-        with open("config.json", "r") as archivo: #Abre el archivo config.json en modo lectura
-            json=json.load(archivo)#Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
-        if not type(json) is list: #Si json no es una lista lanza una excepcion
-            raise Exception("Todos los elementos han de estar en una lista")
-        for js in json:#Recorre json
-            comandos(js) #LLama a la funcion comandos y le pasa la variable js
-    except FileNotFoundError as archivo: #En caso de no encontrar el archivo
-        print(Colores.ROJO+"Error, no existe el fichero configuracion.json"+Colores.FINC)
-    except Exception  as e:#En caso de que salte otra excepcion
-        print("Error: ", e)
+    
+    if len(sys.argv) >= 2: #Comprueba si se ha introducido algun elemento por parametro
+        archivos = sys.argv[1:] #En caso de haber introducido algun elemento, obtendra el array apartir de la segunda posicion
+    
+    for archivo in archivos: #Recorre todos los archivos
+        try:
+            with open(archivo, "r") as fichero: #Abre el archivo config.json en modo lectura
+                json=json.load(fichero)#Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
+            if not type(json) is list: #Si json no es una lista lanza una excepcion
+                raise Exception("Todos los elementos han de estar en una lista")
+            for js in json:#Recorre json
+                comandos(js) #LLama a la funcion comandos y le pasa la variable js
+        except FileNotFoundError as fichero: #En caso de no encontrar el archivo
+            print(Colores.ROJO+"Error, no existe el fichero: "+Colores.VERDE+fichero.filename+Colores.FINC)
+        except Exception  as e:#En caso de que salte otra excepcion
+            print("Error: ", e)
