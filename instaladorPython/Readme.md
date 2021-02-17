@@ -13,7 +13,7 @@ Permite definir en un json paquetes y comandos para que sean ejecutados o instal
         3. El tercer valor será un comando que se ejecutará en caso de coincidir los anteriores valores
         4. El cuarto valor, opcional, será el comando que se ejecutará en caso de no coincidir los valores
 
-El archivo [config.json](config.json), imita al [instalador.sh](../instalador/instalador.sh)
+El archivo [config.json](config.json), imita al [instalador.sh](../instalador/instalador.sh) \
 Ejemplo de uso: 
 ```json
     [

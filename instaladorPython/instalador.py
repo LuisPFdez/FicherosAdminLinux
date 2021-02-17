@@ -19,7 +19,7 @@ def instalar(nombre_paquete):
         if error.returncode == 100: #Si el codigo es 100 muestra un mensaje indicando que el paquete no existe
             print("El paquete "+Colores.AMARILLO+nombre_paquete+Colores.FINC+" no existe")
         else: #En caso contrario muestra un mensaje de error y el codigo que ha devuelto
-            print(Colores.ROJO+"Error, codigo devuelto devuelto: "+error.returncode+Colores.FINC)        
+            print(Colores.ROJO+"Error al instalar, codigo devuelto devuelto: "+error.returncode+Colores.FINC)        
 
 #Comprueba que un paquete no este instalado, con dpkg -s 
 def instalado(nombre_paquete):
@@ -50,7 +50,7 @@ def comprobar(comando):
         elif len(comando) == 4: #Comprueba la longitud, caso de ser 4 ejecuta el otro parametro
             ejecutar_comando(comando[3])
     except (subprocess.CalledProcessError) as error: #Captura la excepcion que lanza subprocess y muestra un mensaje
-        print(Colores.ROJO+"Error, codigo de error: "+error.returncode+Colores.FINC)
+        print(Colores.ROJO+"Error al hacer la comprobacion,  codigo de error: "+error.returncode+Colores.FINC)
     
 def ejecutar_comando(comando):
     try:
@@ -60,7 +60,7 @@ def ejecutar_comando(comando):
         else:
             subprocess.run(comando, shell=True ,check=True, stderr=subprocess.DEVNULL)#Ejecuta el comando
     except (subprocess.CalledProcessError) as error: #Captura la excepcion de subprocess y muesta un mensaje y el codigo que devuelve
-        print(Colores.ROJO+"Error, codigo deveulto devuelto: "+error.returncode+Colores.FINC)    
+        print(Colores.ROJO+"Error al ejecutar el comando, codigo devuelto devuelto: "+error.returncode+Colores.FINC)    
 
 #Funciona a la que se le pasaran los valores del json
 def comandos(comando):
