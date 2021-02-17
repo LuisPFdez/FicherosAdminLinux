@@ -1,0 +1,36 @@
+[
+	{
+		"comando": "apt update"
+	},
+	{
+		"paquete": "apache2",
+		"comprobar": [
+			"cat /etc/passwd | grep 'operadorweb' | wc -l",
+			0,
+			[
+				"useradd -s /bin/bash --no-create-home -G www-data -d /var/www/html operadorweb",
+				"echo operadorweb:paso | chpasswd"
+			]
+		],
+		"comando": [
+			"chown -R operadorweb:www-data /var/www/html",
+			"chmod -R 2775 /var/www/html"
+		]
+	},
+	"php7.4",
+	{
+		"paquete": "php-xdebug",
+		"comando": "cp ./xdebug.ini /etc/php/7.4/mods-available"
+	},
+	"mysql-server-8.0",
+	"phpmyadmin",
+	"php-mbstring",
+	{
+		"comando": [
+			"mysql_secure_installation",
+			"mysql < ./admin.sql",
+			"sed -i 's/^bind-address/#bind-address/' /etc/mysql/mysql.conf.d/mysqld.cnf"
+		]
+	},
+	"bind9"
+]
