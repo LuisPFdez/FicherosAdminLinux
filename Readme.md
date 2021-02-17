@@ -12,7 +12,7 @@ Conjunto de script, servicios y ficheros de configuración para linux
 * vaciadoTmp -> Busca todas las carpetas tmp y borra su contenido
 * preparadoChroot -> Permite la creación rápida de una jaula 
 ## Instalador
-**Permite creación y configuración rápida de un servidor**
+**Permite creación y configuración rápida de un servidor** \
 Crea el usuario **operadorweb**, sino esta creado, e instala: 
 * Apache2 
 * php7.4
