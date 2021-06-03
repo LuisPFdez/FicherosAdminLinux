@@ -43,7 +43,7 @@ function borrar(){
 	fi
 
 }
-if [[ $1 -eq "--version" ]]; then
+
 while getopts ':n:b: hv' flag; do
 	case $flag in
 		n) crear $OPTARG;;
