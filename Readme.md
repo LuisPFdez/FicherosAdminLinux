@@ -19,7 +19,7 @@ Crea el usuario **operadorweb**, sino esta creado, e instala:
 * xdebug
 * mysql
 * phpmyadmin 
-* bind9 \
+* bind9 
 
 En **mysql**, crea un usuario con todos los privilegios sobre todas las bases de datos y con la opcion de grant.
 Para **xdebug**, copia un archivo con la configuracion en la carpeta */etc/php/7.4/mods-available*
