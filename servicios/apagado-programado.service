@@ -1,0 +1,11 @@
+[Unit]
+Description=Servicio que programa el apagado automatico del servidor al enceder este
+#En el status del servicio se muestra un mensaje con la hora programada, otras opciones https://unix.stackexchange.com/questions/229745/systemd-how-to-check-scheduled-time-of-a-delayed-shutdownº
+
+[Service]
+Type=simple
+#man shutdown para mas informacion
+ExecStart=shutdown 23:50
+
+[Install]
+WantedBy=multi-user.target

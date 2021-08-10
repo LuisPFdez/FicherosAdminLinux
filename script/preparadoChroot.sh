@@ -7,7 +7,7 @@ trap borrado INT #En caso de pulsar Control-C llama a la funcion borrado que eli
 
 function borrado (){ # Funcion encargada de borrar el archivo 
   if [[ -f $temporal ]]; then # Comprueba que exista el fichero temporal
-    rm $temporal then #Borra el fichero temporal
+    rm $temporal #Borra el fichero temporal
   fi
   exit 0 #Finaliza el programa sin codigo de error
 }
