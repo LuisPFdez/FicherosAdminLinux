@@ -2,18 +2,37 @@
 import subprocess, os, json, sys
 #La clase colores permitira mostrar mensajes mas personalizados
 class Colores:
-    ROJO = '\033[31m'
+    ROJO = '\033[31;0m'
     FINC = '\033[m'
-    VERDE = '\033[32m'
-    AMARILLO = '\033[33m'
-    AZUL = '\033[34m'
+    VERDE = '\033[32;1m'
+    AMARILLO = '\033[33;1m'
+    AZUL = '\033[34;1m'
+
+#Gestor de paquetes de cada distribucion, se compone del comando para instalar un paquete y para comprobar si un paquete esta instalado
+#El nombre de la distribucion asociada al paquete ha de ser la distribucion principal, por ejemplo para ubuntu y linux mint, debian o arch linux para manjaro
+#En /etc/os-release esta el nombre tanto de la distribucion en la que se basa, como el id de la misma, en caso de no estar basada en ninguna
+sistema_paquetes = {
+    "debian": {
+        "instalar": ["apt", "install", "-y" ],
+        "comprobar": ["dpkg", "-s"]
+    },
+    "arch": {
+       "instalar": ["pacman", "-S", "--noconfirm" ],
+       "comprobar": ["pacman", "-Qi"]
+    },
+}
+
 
 #Instala mediante apt el paquete pasado por parametro
 def instalar(nombre_paquete):
     try:
+        #Hace una copia del array con el comando para instalar el paquete
+        comando = paquete.get("instalar").copy();
+        #Inserta el nombre del paquete al final del array
+        comando.append(nombre_paquete);
         #Ejecuta el comando, establece el check a true para que en caso de error lance una excepcion
         #los errores son redirigidos al dev/null 
-        subprocess.run(["apt", "install", nombre_paquete, "-y"], check=True, stderr=subprocess.DEVNULL)
+        subprocess.run( comando, check=True, stderr=subprocess.DEVNULL)
     #Captura la excepcion CalledProcessError
     except (subprocess.CalledProcessError) as error:
         if error.returncode == 100: #Si el codigo es 100 muestra un mensaje indicando que el paquete no existe
@@ -24,8 +43,12 @@ def instalar(nombre_paquete):
 #Comprueba que un paquete no este instalado, con dpkg -s 
 def instalado(nombre_paquete):
     try:
+        #Hace una copia del array con el comando para comprobar si el paquete esta instalado
+        comando = paquete.get("comprobar").copy();
+        #Inserta el nombre del paquete al final del array
+        comando.append(nombre_paquete);
         #Ejecuta el comando, tanto la salida como los errores va al dev/null, establece check para que salte una excepcion en caso de no estar instalado
-        subprocess.run(["dpkg","-s", nombre_paquete], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,check=True)
+        subprocess.run(comando, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,check=True)
         #Establece la variable instalado a true
         instalado=True
     except:
@@ -75,27 +98,56 @@ def comandos(comando):
             elif llave == "comprobar": #Comprueba si la clave es igual a "comprobar"
                 comprobar(comando[llave])
 
+#Seleciona el sistema de gestion de paquetes en funcion de la distribucion
+def cargar_paquete (): 
+    try:
+        #Prueba a importar el paquete distro
+        import distro
+    except:
+        #En caso de no poder muetra un mensaje y cierra la aplicacion
+        print(Colores.AZUL+"El paquete "+Colores.VERDE+"distro "+Colores.AZUL+"no esta instalado"+Colores.FINC);
+        #Sale con el codigo de error 1
+        exit(1);
+    
+    #Comprueba si la distribucion deriva de otra y si se encuentra en el objeto de sistema_paquetes
+    if ( distro.like() and distro.like() in sistema_paquetes ):
+        #Guarda los comandos en la variable paquete
+        paquete = sistema_paquetes.get(distro.like().lower())
+    #Comprueba si el id de la distribucion se encuentra en el objeto de sistema_paquetes
+    elif (distro.id() in sistema_paquetes ): 
+        #Guarda los comandos en la variable paquete
+        paquete = sistema_paquetes.get(distro.id().lower())
+    else:
+        #En caso de que la distribucion no se encuentre en sistema_paquetes, muestra un mensaje y cierra la apliación
+        print(Colores.AZUL+"El sistema de archivos de la distribucion"+Colores.VERDE+distro.id()+Colores.AZUL+" no esta soportado"+Colores.FINC);
+        exit(1);
+    
+    #Devuelve la variable con los comandos
+    return paquete;
 
 if __name__ == "__main__":
     archivos = ["config.json"] #Por defecto el archivo de configuarion es config.json
     if os.geteuid() != 0: #Comprueba si el script se esta ejecutando como super usuario, en caso de que el uid no sea 0
-        print("Tienes que ser super usuario")#Muestra un mensaje
+        print(Colores.AZUL+"Tienes que ser super usuario"+Colores.FINC)#Muestra un mensaje
         exit(1)#Sale con el codigo de error 1
     
     if len(sys.argv) >= 2: #Comprueba si se ha introducido algun elemento por parametro
         archivos = sys.argv[1:] #En caso de haber introducido algun elemento, obtendra el array apartir de la segunda posicion
     
+    #Ejecuta la funcion cargar_paquete y guarda lo que devuelve en la variable paquete
+    paquete = cargar_paquete();
+
     for archivo in archivos: #Recorre todos los archivos
         try:
             with open(archivo, "r") as fichero: #Abre el archivo config.json en modo lectura
                 json=json.load(fichero)#Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
 
-                if not type(json) is list: #Si json no es una lista lanza una excepcion
-                    raise Exception("Todos los elementos han de estar en una lista")
-                for js in json:#Recorre json
-                    comandos(js) #LLama a la funcion comandos y le pasa la variable js
+                #if not type(json) is list: #Si json no es una lista lanza una excepcion
+                #    raise Exception("Todos los elementos han de estar en una lista")
+                #for js in json:#Recorre json
+                #    comandos(js) #LLama a la funcion comandos y le pasa la variable js
         
         except FileNotFoundError as fichero: #En caso de no encontrar el archivo
             print(Colores.ROJO+"Error, no existe el fichero: "+Colores.VERDE+fichero.filename+Colores.FINC)
-        except Exception  as e:#En caso de que salte otra excepcion
-            print("Error: ", e)
+        except Exception as e:#En caso de que salte otra excepcion
+            print(Colores.ROJO+"Error: " + str(e) +Colores.FINC)
