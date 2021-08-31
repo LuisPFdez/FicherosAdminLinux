@@ -79,7 +79,7 @@ function main (){ #Funcion principal
     #Xargs establece que al comando mkdir, -p permite pasarle una ruta y si algun directorio de la ruta no existe lo creara, el -n establece el numero de parametros pasados al comando
     cat $temporal | awk -F "/" 'BEGIN { OFS = "/"; ORS = "\n" }{NF--}1' | sed "s/^\///" | xargs -n1 mkdir -p
     #Xargs -I establecera donde se guardan los paramentros recibidos. Copia la ruta absoluta añadiendole "/" en la ruta relativa, esta dentro del directorio
-    cat $temporal | sed "s/^\///" | xargs -n1 -I ruta cp /ruta ruta
+    cat $temporal | sed "s/^\///" | xargs -I ruta cp /ruta ruta
     #Por ultimo llama a borrado para finalizar el programa y borrar el fichero temporal
     borrado
   else
