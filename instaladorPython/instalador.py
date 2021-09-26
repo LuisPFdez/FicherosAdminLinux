@@ -142,10 +142,10 @@ if __name__ == "__main__":
             with open(archivo, "r") as fichero: #Abre el archivo config.json en modo lectura
                 json=json.load(fichero)#Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
 
-                #if not type(json) is list: #Si json no es una lista lanza una excepcion
-                #    raise Exception("Todos los elementos han de estar en una lista")
-                #for js in json:#Recorre json
-                #    comandos(js) #LLama a la funcion comandos y le pasa la variable js
+                if not type(json) is list: #Si json no es una lista lanza una excepcion
+                    raise Exception("Todos los elementos han de estar en una lista")
+                for js in json:#Recorre json
+                    comandos(js) #LLama a la funcion comandos y le pasa la variable js
         
         except FileNotFoundError as fichero: #En caso de no encontrar el archivo
             print(Colores.ROJO+"Error, no existe el fichero: "+Colores.VERDE+fichero.filename+Colores.FINC)
