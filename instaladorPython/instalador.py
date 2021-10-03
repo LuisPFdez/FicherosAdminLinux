@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from io import TextIOWrapper
 import subprocess
 from json import load, loads, dumps
 from os import geteuid, path
@@ -146,6 +145,7 @@ def cargar_paquete ():
     return paquete
 
 def comprobar_dependencias ( dependencias ):
+    
     if type(dependencias) is str:
         if not path.isfile(dependencias):
             print("El archivo no existe")
@@ -156,8 +156,10 @@ def comprobar_dependencias ( dependencias ):
             if not path.isfile(dependencia):
                 print("El archivo no existe")
                 funcion_error(1)
+    elif dependencias is None:
+        return None
     else:
-        raise Exception("Error provisional, el tipo de denpendencia has de ser distinto ")
+        raise Exception("Error provisional, el tipo de dependencias has de ser distintas")
 
 def renderizar_variables ( json, dependencias = None, json_variables = None, contiene_variables = None  ):
     renderizar = False
@@ -178,7 +180,7 @@ def renderizar_variables ( json, dependencias = None, json_variables = None, con
         temp = temp.replace("$\\\{", "${")
         json = loads(temp)
         if not dependencias is None:
-            temp = Template(dumps( json ))
+            temp = Template(dumps( dependencias ))
             temp = temp.safe_substitute(datos_renderizado)
             temp = temp.replace("$\\\{", "${")
             dependencias = loads(temp)
@@ -190,6 +192,7 @@ def renderizar_variables ( json, dependencias = None, json_variables = None, con
         #ejecutar_comando(js)
 
 def definir_funcion_error ( error ):
+    global funcion_error
     if error:
         funcion_error = lambda codigo: exit(codigo)
     else:
@@ -225,10 +228,10 @@ def archivo_configuracion ( archivo ):
             archivo_config["contine_variables"] = archivo.get("contine_variables");
 
         if archivo.get ("ficheros"):
-            configuracion_archivo(archivo.get ("ficheros"))
+            comprobador_archivos (archivo.get ("ficheros"))
             
     else :
-        print( "Ya se ha pasdado otro archivo de configuracion" )
+        print( "Ya se ha pasado otro archivo de configuracion" )
         funcion_error(1)
 
 def comprobar_configuracion (archivo): 
@@ -250,9 +253,12 @@ def comprobar_configuracion (archivo):
         
         if archivo_config["finalizar_error"] is None: 
             definir_funcion_error ( archivo.get("finalizar_error"))
-        
-        if archivo.get("dependencias"): 
-            comprobar_dependencias(archivo.get("dependencias"))
+
+        if not type(archivo.get("comandos")) is list:
+            print("Error, es necesario que exista la propiedad comandos y que sea una lista")
+            exit (1)
+
+        renderizar_variables(archivo.get("comandos"), archivo.get("dependencias"), archivo.get("variables"), archivo.get("contiene_variables"));
 
 def configuracion_archivo ( archivo ):
     json=load(archivo)#Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
@@ -272,7 +278,7 @@ def comprobador_archivos(listado_archivos):
         if not type(listado_archivos) is list:
             raise Exception("El listado de archivo ha de ser una lista");
 
-        for archivo in archivos: #Recorre todos los archivos
+        for archivo in listado_archivos: #Recorre todos los archivos
             with open(archivo, "r") as fichero: #Abre el archivo config.json en modo lectura
                 configuracion_archivo( fichero )
     
@@ -285,10 +291,10 @@ def comprobador_archivos(listado_archivos):
 
 #Si el modulo es el principal
 if __name__ == "__main__":
-    archivos = ["config.json"] #Por defecto el archivo de configuarion es config.json
+    archivos = ["configuracion.json"] #Por defecto el archivo de configuarion es config.json
     
     if len(argv) >= 2: #Comprueba si se ha introducido algun elemento por parametro
         archivos = argv[1:] #En caso de haber introducido algun elemento, obtendra el array apartir de la segunda posicion
 
     #LLama a la funcion comprobador_archivo para que interprete la informacion de los json
-    comprobador_archivos( )
+    comprobador_archivos( archivos );
