@@ -7,7 +7,7 @@ from string import Template
 
 #La clase colores permitira mostrar mensajes mas personalizados
 class Colores:
-    ROJO = '\033[31;0m'
+    ROJO = '\033[31;1m'
     FINC = '\033[m'
     VERDE = '\033[32;1m'
     AMARILLO = '\033[33;1m'
@@ -27,16 +27,22 @@ sistema_paquetes = {
     },
 }
 
+# Diccionario para almacenar los parametros del fichero de configuracion
 archivo_config = {
+    #  Almacena si el archivo de configuracion se ha inciado
     "iniciado": False,
-    "contine_variables": False,
+    # Valor de la propiedad de contiene_variables de la configuracion, por defecto en falso
+    "contiene_variables": False,
+    # El diccionario con las variables del archivo de configuracion, por defecto un diccionario vacio
     "variables": {},
+    # Valor de la propiedad de finalizar_error, por defecto en falso
     "finalizar_error": None,
 }
 
+#Variable global para almacenar el diccionario con los comandos del sistema de paquetes
 paquete = None
 
-# Funcion encargada de manejar como ha de comportarse el codigo en caso de error, por defecto el codigo finaliza el en caso de error
+# Funcion encargada de manejar como ha de comportarse el codigo en caso de error, por defecto el codigo finaliza en el caso de error
 funcion_error = lambda codigo: exit(codigo)
 
 #Instala mediante apt el paquete pasado por parametro
@@ -92,18 +98,21 @@ def comprobar(comando):
             ejecutar_comando(comando[3])
     except (subprocess.CalledProcessError) as error: #Captura la excepcion que lanza subprocess y muestra un mensaje
         print(Colores.ROJO+"Error al hacer la comprobacion,  codigo de error: "+str(error.returncode)+Colores.FINC)
-        funcion_error(1)
+        funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
 
+#Funcion para ejecutar un comando, comprueba si ese comando es una lista o un string
 def ejecutar_comando(comando):
     try:
         if type(comando) is list: #Comprueba si se le ha pasado una lista de comandos o un comando solo
             for com in comando:#Recorre la lista
                 subprocess.run(com, shell=True ,check=True, stderr=subprocess.DEVNULL) #Ejecuta el comando
-        else:
+        elif type(comando) is str: # Comprueba si comando es un string
             subprocess.run(comando, shell=True ,check=True, stderr=subprocess.DEVNULL)#Ejecuta el comando
+        else: # En caso de no ser ni una lista ni un string lanza una excepcion
+            raise Exception("El comando ha de ser una lista o un string") 
     except (subprocess.CalledProcessError) as error: #Captura la excepcion de subprocess y muesta un mensaje y el codigo que devuelve
         print(Colores.ROJO+"Error al ejecutar el comando, codigo devuelto devuelto: "+str(error.returncode)+Colores.FINC)    
-        funcion_error(1)
+        funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
 
 #Funciona a la que se le pasaran los valores del json
 def comandos(comando):
@@ -126,7 +135,7 @@ def cargar_paquete ():
     except:
         #En caso de no poder muetra un mensaje y cierra la aplicacion
         print(Colores.AZUL+"El paquete "+Colores.VERDE+"distro "+Colores.AZUL+"no esta instalado"+Colores.FINC)
-        funcion_error(1) 
+        funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
     
     #Comprueba si la distribucion deriva de otra y si se encuentra en el objeto de sistema_paquetes
     if ( like() and like() in sistema_paquetes ):
@@ -144,157 +153,214 @@ def cargar_paquete ():
     #Devuelve la variable con los comandos
     return paquete
 
+#Funcion que comprueba si existen los archivos pasados por dependencia
 def comprobar_dependencias ( dependencias ):
-    
+    #Comprueba si dependencias es un string
     if type(dependencias) is str:
+        # Comprueba si el archivo existe, en caso de no existir lanza un mensaje de error
         if not path.isfile(dependencias):
-            print("El archivo no existe")
-            funcion_error(1)
-
+            print(Colores.ROJO+"El archivo "+Colores.AMARILLO+dependencias+Colores.ROJO+" no existe"+Colores.FINC) # Mensaje de error
+            funcion_error(1)  #Funcion que determina el comportamiento del codigo en un error
+    # Comprueba si dependencias es un list
     elif type(dependencias) is list:
+        # Recorre dependencias
         for dependencia in dependencias:
+            # Comprueba si el archivo existe, en caso de no existir lanza un mensaje de error
             if not path.isfile(dependencia):
-                print("El archivo no existe")
-                funcion_error(1)
-    elif dependencias is None:
-        return None
-    else:
-        raise Exception("Error provisional, el tipo de dependencias has de ser distintas")
+                print(Colores.ROJO+"El archivo "+Colores.AMARILLO+dependencia+Colores.ROJO+" no existe"+Colores.FINC) # Mensaje de error
+                funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
+    elif dependencias is None: # En caso de que dependencias no tenga valor, no devuelve ningun valor
+        return None # Acaba la funcion pero no devuelve nada
+    else: # En caso de tener un tipo distinto a los anteriores lanza una excepcion
+        raise Exception("Error: el tipo de dependencias ha de ser un listado o un string") # Lanza una excepcion
 
+# Funcion encargada de renderizar las variables de comandos y dependecias, y ejecutar los comandos
+# El primer argumento es el json con los comandos, el segundo los archivos de los que depende ( tambien pueden contener variables )
+# el tercero las variables locales del archivo y por ultimo la propiedad que indica si ha de renderizarse
+# Salvo el primer argumento todos son opcionales y estan inicializados a None
 def renderizar_variables ( json, dependencias = None, json_variables = None, contiene_variables = None  ):
+    # Por defecto no se intenta remplazar las variables
     renderizar = False
 
+    # Si las variables y la propiedad que contiene las variables son nulas asina el valor de contiene_variables del archivo de configuracion
     if json_variables is None and contiene_variables is None:
-        renderizar = archivo_config["contine_variables"]
-    elif type(json_variables) is dict and contiene_variables is None:
-        renderizar = True
-    else:
-        renderizar: contiene_variables
-
-    if renderizar: 
+        renderizar = archivo_config["contiene_variables"] # Asigna a renderizar el valor de contiene_variables de archivo_config
+    #Si el archivo tiene variables declaradas y contiene_variables es nulo, se renderizaran las variables
+    elif type(json_variables) is dict and contiene_variables is None: 
+        renderizar = True # Asigna True a renderizar
+    else: # En el caso de que contiene_variables este declarado, independientemente de si lo esta json_variables
+        renderizar = contiene_variables # Asigna a renderizar el valor de contiene_variables 
+    
+    #Si renderizar es igual a True
+    if renderizar == True: # (En caso de que el valor sea 1 tambien entrará)
+        # Hace una copia de la lista variables, de la variable global archivo_config y la almacena en datos_renderizado
         datos_renderizado = archivo_config["variables"].copy()
-        datos_renderizado.update( json_variables or {})
+        # Actualiza la variable datos_renderizado con las variables locales del json ( en caso de tener un valor nulo usa una variable vacia)
+        datos_renderizado.update( json_variables or {}) # En caso de que alguna propiedad se repita las variables locales la sobre
 
-        temp = Template(dumps( json ))
+        # Le pasa el json convertido a string
+        temp = Template(dumps( json )) 
+        # Sustituye las varibles por su valor
         temp = temp.safe_substitute(datos_renderizado)
-        temp = temp.replace("$\\\{", "${")
+        # Todas las variables que contengan un $\\{ los replanza por  ${
+        temp = temp.replace("$\\\{", "${") 
+        # Vuelve a convertir a un json los comandos y lo almacena en json
         json = loads(temp)
-        if not dependencias is None:
-            temp = Template(dumps( dependencias ))
+
+        if not dependencias is None: # Comprueba si dependencias tiene un valor nulo
+            # Le pasa el json convertido a string
+            temp = Template(dumps( dependencias )) 
+            # Sustituye las varibles por su valor
             temp = temp.safe_substitute(datos_renderizado)
+            # Todas las variables que contengan un $\\{ los replanza por  ${
             temp = temp.replace("$\\\{", "${")
+            # Vuelve a convertir a un json los comandos y lo almacena en dependencias
             dependencias = loads(temp)
 
+    # LLama a la variable comprobar dependencias y le pasa el parametro dependecias, renderizado en caso de tener algun valor
     comprobar_dependencias(dependencias)
 
+    # Recorre los comandos
     for js in json:
-        print ( js )
-        #ejecutar_comando(js)
+        # LLama a comandos y le pasa la variable comandos renderizada
+        comandos(js)
 
+# Funcion encargada de definir el comportamiento del programa en caso de error, no todos los errores se comportan en base a esta funcion 
 def definir_funcion_error ( error ):
+    # Declara funcion_error como global
     global funcion_error
-    if error:
-        funcion_error = lambda codigo: exit(codigo)
-    else:
-        funcion_error = lambda codigo: codigo
 
+    if error == True: # En caso de que error sea True o 1 
+        # Establece la variable funcion_error como una funcion anonima
+        funcion_error = lambda codigo: exit(codigo) # Establece funcion como una funcion que recibe un codigo y llama a exit 
+    else:
+        # Establece la variable funcion_error como una funcion anonima
+        funcion_error = lambda codigo: codigo # La funcion anonima no hace nada con el codigo, continua en caso de llamarse
+
+# Funcion encargada de comprobar los valores y parametros del archivo de configuracion
 def archivo_configuracion ( archivo ):
+    #Define la variable como global
     global paquete
 
-    if archivo.get("sudo") and geteuid != 0: # Comprueba si el archivo necesita el
-            print(Colores.AZUL+"Tienes que ser super usuario"+Colores.FINC)#Muestra un mensaje
+    if not archivo_config["iniciado"]: # Comprueba si ya se ha pasado antes otro archivo de configuracion
+        # Establece la varible iniciado a True ( indica si se ha pasado un archivo de configuracion )
+        archivo_config["iniciado"] = True
+        
+        # Comprueba si el archivo establece como necesario el usuario root y en caso de ser asi comprueba si el uid es igual a 0 (id del root)
+        if archivo.get("sudo") == True and geteuid != 0: 
+            print(Colores.ROJO+"Tienes que ser super usuario"+Colores.FINC) # Muestra un mensaje indicando que es necesario ser usuario root 
             exit(1)#Sale con el codigo de error 1
-
-    if not archivo_config["iniciado"]:
-        archivo_config["iniciado"] = True;
-        if paquete is None:
-            if not archivo.get("distro") is None: 
-                paquete = sistema_paquetes.get(archivo.get("distro"))
+        
+        # Comprueba si el archivo es de configuracion 
+        if paquete is None and archivo.get("contiene_instalar") != False: # Contiene_instalar permite usar los comandos sin necesidas de cargar el sistema de paquetes
+            if not archivo.get("distro") is None: # Comprueba si la distro esta declarada en el archivo
+                paquete = sistema_paquetes.get(archivo.get("distro")) # Carga el sistema de paquetes apartir de la distro
             else :
                 #Ejecuta la funcion cargar_paquete y guarda lo que devuelve en la variable paquete
-                paquete = cargar_paquete()
+                paquete = cargar_paquete() # Carga el paquete a traves del paquete distro 
         
-        if archivo.get("finalizar_error") :
-            definir_funcion_error ( archivo.get("finalizar_error"))
-            archivo_config["finalizar_error"] = False
+        # Comprueba que la propiedad finalizar_error tenga algun valor
+        if not archivo.get("finalizar_error") is None: 
+            definir_funcion_error ( archivo.get("finalizar_error")) # LLama al la funcion que define el comportamiento y le pasa el valor de la propiedad
+            archivo_config["finalizar_error"] = False # Establece finalizar_error en la configuracion global para que no sea sobreescrito
 
+        # Comprueba si la propiedad dependencias esta declarada
         if archivo.get("dependencias"): 
-            comprobar_dependencias(archivo.get("dependencias"))
+            comprobar_dependencias(archivo.get("dependencias")) # Le pasa las dependendias a la funcion comprobar dependencias
 
+        # Comprueba si el archivo tiene variables declaradas
         if type(archivo.get("variables")) is dict: 
-            archivo_config["contine_variables"] = True;
-            archivo_config["variables"] = archivo.get("variables")
-        elif type(archivo_config.get("contine_variables")) :
-            archivo_config["contine_variables"] = archivo.get("contine_variables");
+            # Establece la variable que indica el valor de contiene_variables con el valor del archivo de configuracion, en caso de no estar
+            # declarado lo establece a True
+            archivo_config["contiene_variables"] = archivo.get("contiene_variables") or True 
+            archivo_config["variables"] = archivo.get("variables") # Almacena las varibles globales
+        elif type(archivo.get("contiene_variables")) is bool: # Comprueba si contiene variables es un boolean
+            archivo_config["contiene_variables"] = archivo.get("contiene_variables") # Guarda el valor ed contiene_variables en la configuracion global
 
+        # Por ultimo comprueba si se han declarado otros ficheros para ejecutar
         if archivo.get ("ficheros"):
+            # LLama a la funcion obtener archivos y le pasa los ficheros a importar
             comprobador_archivos (archivo.get ("ficheros"))
-            
+
     else :
-        print( "Ya se ha pasado otro archivo de configuracion" )
-        funcion_error(1)
+        # En caso de que ya se haya pasado un archivo de configuracion se muestra un mensaje por pantalla 
+        print( Colores.AMARILLO+"Aviso, ya se ha pasado antes otro archivo de configuración"+Colores.FINC )
 
 def comprobar_configuracion (archivo): 
+    #Define la variable como global
     global paquete
 
-    if archivo.get("archivo_configuracion"):
-        archivo_configuracion ( archivo )
-    else: 
-        if archivo.get("sudo") and geteuid != 0: # Comprueba si el archivo necesita el
-            print(Colores.AZUL+"Tienes que ser super usuario"+Colores.FINC)#Muestra un mensaje
+    # Comprueba si el archivo es de configuracion 
+    if archivo.get("archivo_configuracion") == True:
+        archivo_configuracion ( archivo ) # Pasa el json a la funcion encargada del archivo de configuracion
+
+    else: # En caso de ser un archivo normal
+        # Comprueba si el archivo establece como necesario el usuario root y en caso de ser asi comprueba si el uid es igual a 0 (id del root)
+        if archivo.get("sudo") and geteuid != 0:
+            print(Colores.ROJO+"Tienes que ser super usuario"+Colores.FINC)# Muestra un mensaje indicando que es necesario ser usuario root 
             exit(1)#Sale con el codigo de error 1
         
-        if paquete is None:
-            if not archivo.get("distro") is None: 
-                paquete = sistema_paquetes.get(archivo.get("distro"))
+        # Comprueba si la varible paquete aun no se ha inicializado y el archivo no establece directamente que evita el uso del sistema de instalacion
+        if paquete is None and archivo.get("contiene_instalar") != False: # Contiene_instalar permite usar los comandos sin necesidas de cargar el sistema de paquetes
+            if not archivo.get("distro") is None: # Comprueba si la distro esta declarada en el archivo
+                paquete = sistema_paquetes.get(archivo.get("distro")) # Carga el sistema de paquetes apartir de la distro
             else :
                 #Ejecuta la funcion cargar_paquete y guarda lo que devuelve en la variable paquete
-                paquete = cargar_paquete()
+                paquete = cargar_paquete() # Carga el paquete a traves del paquete distro 
         
+        # Comprueba si el archivo de configuracion ya ha definido el comportamiento en caso de error 
         if archivo_config["finalizar_error"] is None: 
-            definir_funcion_error ( archivo.get("finalizar_error"))
+            # LLama a funcion definir funcion error pasandole el valor de la propiedad finalizar_error
+            definir_funcion_error ( archivo.get("finalizar_error")) # Si finalizar_error no esta declarado, se trata como false
 
-        if not type(archivo.get("comandos")) is list:
-            print("Error, es necesario que exista la propiedad comandos y que sea una lista")
-            exit (1)
+        if not type(archivo.get("comandos")) is list: # En caso de que comandos no este definido lanza un error 
+            print(Colores.ROJO+"Error, es necesario que exista la propiedad comandos y que sea una lista"+ Colores.FINC) # Mensaje de error
+            exit (1) # Sale con el codigo de error 1
+        
+        # LLama a la funcion renderizar variables ( salvo la propiedad comandos, todas las demas variables no es necesario que esten declaradas )
+        renderizar_variables(archivo.get("comandos"), archivo.get("dependencias"), archivo.get("variables"), archivo.get("contiene_variables"))
 
-        renderizar_variables(archivo.get("comandos"), archivo.get("dependencias"), archivo.get("variables"), archivo.get("contiene_variables"));
-
+# Funcion que se encarga de convertir a json los datos del archivo y definir su comportamiento
 def configuracion_archivo ( archivo ):
     json=load(archivo)#Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
 
-    if type(json) is list: #Si json no es una lista lanza una excepcion
-        renderizar_variables(json)
-    elif type (json) is dict:
+    if type(json) is list: #Si json es una lista llama directamente a renderizar_variables
+        renderizar_variables(json) # A la funcion le pasa unicamente el json, los demas parametros tendran un valor nulo
+    elif type (json) is dict: # En caso de ser un diccionario se llama a la funcion para comprobar su configuracion
         comprobar_configuracion (json)
 
-
-
+# Funcion encargada de recorrer los archivos pasados por parametro
 def comprobador_archivos(listado_archivos):
     try:
+        # Comprueba si el listado de archivos es un string 
         if type(listado_archivos) is str:
-            listado_archivos = [listado_archivos];
+            listado_archivos = [listado_archivos] # Convierte listado_archivos en una lista
 
-        if not type(listado_archivos) is list:
-            raise Exception("El listado de archivo ha de ser una lista");
+        if not type(listado_archivos) is list: # Si listado_archivos no es una lista lanza una excepcion
+            raise Exception("Los archivos han de ser una lista o un string")
 
         for archivo in listado_archivos: #Recorre todos los archivos
             with open(archivo, "r") as fichero: #Abre el archivo config.json en modo lectura
-                configuracion_archivo( fichero )
+                configuracion_archivo( fichero ) # LLama a la funcion que se encarga de convertir los datos del archivo en un json
+            # Muestra un mensaje indicando la finalizacion del archivo
+            print ( Colores.VERDE+"Finalizada ejecucion el archivo: "+Colores.AZUL+archivo+Colores.FINC )
     
     except FileNotFoundError as fichero: #En caso de no encontrar el archivo
-        print(Colores.ROJO+"Error, no existe el fichero: "+Colores.VERDE+fichero.filename+Colores.FINC)
-        funcion_error(1)
+        print(Colores.ROJO+"Error, no existe el fichero: "+Colores.VERDE+fichero.filename+Colores.FINC) # Mensaje error
+        funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
     except Exception as e:#En caso de que salte otra excepcion
-        print(Colores.ROJO+"Error: " + str(e) +Colores.FINC)
-        funcion_error(1)
+        print(Colores.ROJO+"Error: " + str(e) +Colores.FINC) # Mensaje error
+        funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
 
 #Si el modulo es el principal
 if __name__ == "__main__":
-    archivos = ["configuracion.json"] #Por defecto el archivo de configuarion es config.json
+    archivos = ["config.json"] #Por defecto el archivo de configuarion es config.json
     
     if len(argv) >= 2: #Comprueba si se ha introducido algun elemento por parametro
         archivos = argv[1:] #En caso de haber introducido algun elemento, obtendra el array apartir de la segunda posicion
 
     #LLama a la funcion comprobador_archivo para que interprete la informacion de los json
-    comprobador_archivos( archivos );
+    comprobador_archivos( archivos )
+
+    # Muestra un mensaje de finalizacion del script 
+    print(Colores.AZUL+"Finalizado script"+Colores.FINC);
