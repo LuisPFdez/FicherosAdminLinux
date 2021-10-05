@@ -43,7 +43,7 @@ archivo_config = {
 paquete = None
 
 # Funcion encargada de manejar como ha de comportarse el codigo en caso de error, por defecto el codigo finaliza en el caso de error
-funcion_error = lambda codigo: exit(codigo)
+def funcion_error(codigo): return exit(codigo)
 
 #Instala mediante apt el paquete pasado por parametro
 def instalar(nombre_paquete):
@@ -232,10 +232,10 @@ def definir_funcion_error ( error ):
 
     if error == True: # En caso de que error sea True o 1 
         # Establece la variable funcion_error como una funcion anonima
-        funcion_error = lambda codigo: exit(codigo) # Establece funcion como una funcion que recibe un codigo y llama a exit 
+        def funcion_error(codigo): return exit(codigo) # Establece funcion como una funcion que recibe un codigo y llama a exit 
     else:
         # Establece la variable funcion_error como una funcion anonima
-        funcion_error = lambda codigo: codigo # La funcion anonima no hace nada con el codigo, continua en caso de llamarse
+        def funcion_error(codigo): return codigo # La funcion anonima no hace nada con el codigo, continua en caso de llamarse
 
 # Funcion encargada de comprobar los valores y parametros del archivo de configuracion
 def archivo_configuracion ( archivo ):
