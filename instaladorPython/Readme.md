@@ -68,3 +68,13 @@ Ejemplo de uso:
         }
     ]
 ```
+
+
+# Tipos ( temporal )
+- distro -> Ambos, config importante
+- contiene_variables -> ambos, local importante
+- variables -> ambos, local sobreescribe a config, $\\{ evita renderizar la variable
+- dependencias -> ambos, en local permite variables
+- ficheros -> archivo configuracion
+- archivo_configuracion -> archivo config
+- comandos -> fichero normal
