@@ -18,9 +18,9 @@ class Plantilla(Template):
     # Fija el patron para renderizar una variable
     pattern = r"""
         \$(?:
-        (?P<escaped>(?!))               | # Evita el caracter de escape
+        (?P<escaped>\\\\)               | # Evita el caracter de escape
         (?P<named>(?!))                 | # Evita la renderizar la variable que no esta entre llaves
-        \{(?P<braced>[A-Z_][A-Z_\d]+)\} | # Renderiza variable entre llaves
+        \{(?P<braced>[A-Z_][A-Z_\-\d]+)\} | # Renderiza variable entre llaves
         (?P<invalid>)
     )"""
 
@@ -213,8 +213,6 @@ def renderizar_variables ( json, dependencias = None, json_variables = None, con
         temp = Plantilla(dumps( json )) 
         # Sustituye las varibles por su valor
         temp = temp.safe_substitute(datos_renderizado)
-        # Todas las variables que contengan un $\\{ los replanza por  ${
-        temp = temp.replace("$\\\{", "${") 
         # Vuelve a convertir a un json los comandos y lo almacena en json
         json = loads(temp)
 
@@ -223,8 +221,6 @@ def renderizar_variables ( json, dependencias = None, json_variables = None, con
             temp = Plantilla(dumps( dependencias )) 
             # Sustituye las varibles por su valor
             temp = temp.safe_substitute(datos_renderizado)
-            # Todas las variables que contengan un $\\{ los replanza por  ${
-            temp = temp.replace("$\\\{", "${")
             # Vuelve a convertir a un json los comandos y lo almacena en dependencias
             dependencias = loads(temp)
 
@@ -241,12 +237,12 @@ def definir_funcion_error ( error ):
     # Declara funcion_error como global
     global funcion_error
 
-    if error == True: # En caso de que error sea True o 1 
-        # Establece la variable funcion_error como una funcion anonima
-        def funcion_error(codigo): return exit(codigo) # Establece funcion como una funcion que recibe un codigo y llama a exit 
-    else:
+    if error == False: # En caso de que error sea False o 0 
         # Establece la variable funcion_error como una funcion anonima
         def funcion_error(codigo): return codigo # La funcion anonima no hace nada con el codigo, continua en caso de llamarse
+    else:
+        # Establece la variable funcion_error como una funcion anonima
+        def funcion_error(codigo): return exit(codigo) # Establece funcion como una funcion que recibe un codigo y llama a exit 
 
 # Funcion encargada de comprobar los valores y parametros del archivo de configuracion
 def archivo_configuracion ( archivo ):
