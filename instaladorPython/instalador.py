@@ -13,6 +13,17 @@ class Colores:
     AMARILLO = '\033[33;1m'
     AZUL = '\033[34;1m'
 
+# Clase propia que extiende de template
+class Plantilla(Template):
+    # Fija el patron para renderizar una variable
+    pattern = r"""
+        \$(?:
+        (?P<escaped>(?!))               | # Evita el caracter de escape
+        (?P<named>(?!))                 | # Evita la renderizar la variable que no esta entre llaves
+        \{(?P<braced>[A-Z_][A-Z_\d]+)\} | # Renderiza variable entre llaves
+        (?P<invalid>)
+    )"""
+
 #Gestor de paquetes de cada distribucion, se compone del comando para instalar un paquete y para comprobar si un paquete esta instalado
 #El nombre de la distribucion asociada al paquete ha de ser la distribucion principal, por ejemplo para ubuntu y linux mint, debian o arch linux para manjaro
 #En /etc/os-release esta el nombre tanto de la distribucion en la que se basa, como el id de la misma, en caso de no estar basada en ninguna
@@ -174,7 +185,7 @@ def comprobar_dependencias ( dependencias ):
     else: # En caso de tener un tipo distinto a los anteriores lanza una excepcion
         raise Exception("Error: el tipo de dependencias ha de ser un listado o un string") # Lanza una excepcion
 
-# Funcion encargada de renderizar las variables de comandos y dependecias, y ejecutar los comandos
+# Funcion encargada de renderizar las variables de comandos y dependencias, y ejecutar los comandos
 # El primer argumento es el json con los comandos, el segundo los archivos de los que depende ( tambien pueden contener variables )
 # el tercero las variables locales del archivo y por ultimo la propiedad que indica si ha de renderizarse
 # Salvo el primer argumento todos son opcionales y estan inicializados a None
@@ -199,7 +210,7 @@ def renderizar_variables ( json, dependencias = None, json_variables = None, con
         datos_renderizado.update( json_variables or {}) # En caso de que alguna propiedad se repita las variables locales la sobre
 
         # Le pasa el json convertido a string
-        temp = Template(dumps( json )) 
+        temp = Plantilla(dumps( json )) 
         # Sustituye las varibles por su valor
         temp = temp.safe_substitute(datos_renderizado)
         # Todas las variables que contengan un $\\{ los replanza por  ${
@@ -209,7 +220,7 @@ def renderizar_variables ( json, dependencias = None, json_variables = None, con
 
         if not dependencias is None: # Comprueba si dependencias tiene un valor nulo
             # Le pasa el json convertido a string
-            temp = Template(dumps( dependencias )) 
+            temp = Plantilla(dumps( dependencias )) 
             # Sustituye las varibles por su valor
             temp = temp.safe_substitute(datos_renderizado)
             # Todas las variables que contengan un $\\{ los replanza por  ${
@@ -217,7 +228,7 @@ def renderizar_variables ( json, dependencias = None, json_variables = None, con
             # Vuelve a convertir a un json los comandos y lo almacena en dependencias
             dependencias = loads(temp)
 
-    # LLama a la variable comprobar dependencias y le pasa el parametro dependecias, renderizado en caso de tener algun valor
+    # LLama a la variable comprobar dependencias y le pasa el parametro dependencias, renderizado en caso de tener algun valor
     comprobar_dependencias(dependencias)
 
     # Recorre los comandos
