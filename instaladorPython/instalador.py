@@ -94,13 +94,13 @@ def instalado(nombre_paquete):
         return instalado
 
 #Compueba que el resultado de un comando sea el esperado y ejecuta otro comando, caso contrario
-#ejecutara otro parametro opcional, si ha sido pasado
+#ejecutara otro parametro opcional, en caso de haberse pasado
 def comprobar(comando):
     try:
         #Si el parametro comando no es una lista lanza una excepcion
         if not type(comando) is list:
             raise Exception("El valor ha de ser un array")
-        #Ejecuta el comando, establece el parametro shell a true para evitar problemas con ciertos ascepectos de la shell
+        #Ejecuta el comando, establece el parametro shell a true para evitar problemas con ciertos aspectos de la shell
         #Los errores son redigidos al dev/null y la salida a la variable salida. En caso de erro lanza excepcion
         salida = subprocess.run(comando[0], shell=True ,check=True, stderr=subprocess.DEVNULL, text=True ,stdout=subprocess.PIPE)
         if salida.stdout.strip()  == str(comando[1]): #Comprueba si la salida es igual a lo esperado
@@ -110,6 +110,26 @@ def comprobar(comando):
     except (subprocess.CalledProcessError) as error: #Captura la excepcion que lanza subprocess y muestra un mensaje
         print(Colores.ROJO+"Error al hacer la comprobacion,  codigo de error: "+str(error.returncode)+Colores.FINC)
         funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
+
+#Comprueba la salida de un comando sea el esperado y ejecuta un comando. en caso contrario, 
+#ejecutara otro comando opcional, en caso de haberse pasado
+def comprobar_comando(comando): 
+    try:
+        #Si el parametro comando no es una lista lanza una excepcion
+        if not type(comando) is list:
+            raise Exception("El valor ha de ser un array")
+        #Ejecuta el comando, establece el parametro shell a true para evitar problemas con ciertos aspectos de la shell
+        #Los errores son redigidos al dev/null y la salida a la variable salida.
+        salida = subprocess.run(comando[0], shell=True ,check=False, stderr=subprocess.DEVNULL, text=True ,stdout=subprocess.PIPE)
+        if salida.returncode  == int(comando[1]): #Comprueba si el codigo de ejecucion es igual al esperado
+            ejecutar_comando(comando[2]) #En caso afirmativo ejecuta el comando
+        elif len(comando) == 4: #Comprueba la longitud, caso de ser 4 ejecuta el otro comando
+            ejecutar_comando(comando[3])
+    except ValueError as error: #En caso de que el codigo de salida no sea un número
+        print(Colores.ROJO+"Error, el codigo de salida del comando ha de ser un numero"+Colores.FINC)
+        funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
+
+    
 
 #Funcion para ejecutar un comando, comprueba si ese comando es una lista o un string
 def ejecutar_comando(comando):
@@ -137,6 +157,8 @@ def comandos(comando):
                 ejecutar_comando(comando[llave])
             elif llave == "comprobar": #Comprueba si la clave es igual a "comprobar"
                 comprobar(comando[llave])
+            elif llave == "comprobar_comando": #Comprueba si la clave es igual a "comprobar_comando"
+                comprobar_comando(comando[llave])
 
 #Seleciona el sistema de gestion de paquetes en funcion de la distribucion
 def cargar_paquete (): 

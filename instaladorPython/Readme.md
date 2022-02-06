@@ -99,6 +99,11 @@ Los archivos JSON, que no sean de configuración pueden ser un objeto, cuyas pro
         2. El primer valor ha de ser un valor para comparar con la salida del comando
         3. El tercer valor será un comando que se ejecutará en caso de coincidir los anteriores valores, puede ser una cadena o un lista
         4. El cuarto valor, opcional, será el comando que se ejecutará en caso de no coincidir los valores, puede ser una cadena o un lista
+    * **comprobar_comando** -> recibe un lista, con tres o cuatro valores:
+        1. El primer valor ha de ser un comando
+        2. El primer valor ha de ser un número, el codigo de salida, esperada, del comando
+        3. El tercer valor será un comando que se ejecutará en caso de coincidir los anteriores valores, puede ser una cadena o un lista
+        4. El cuarto valor, opcional, será el comando que se ejecutará en caso de no coincidir los valores, puede ser una cadena o un lista
 
 El archivo [config.json](config.json), imita al [instalador.sh](../instalador/instalador.sh) \
 Ejemplo de uso: 
@@ -112,16 +117,27 @@ Ejemplo de uso:
                 "comando",
                 "resultado esperado",
                 "comando"
+            ],
+            "comprobar_comando": [
+                "comando para comprobar salida",
+                2,
+                "comando"
             ]
-        }
+        },
         {
             "comando": [
                 "comando",
-                "comando",
+                "comando"
             ],
             "comprobar": [
                 "comando",
                 "resultado esperado",
+                "comando",
+                "comando2"
+            ],
+            "comprobar_comando": [
+                "comando para comprobar salida",
+                2,
                 "comando",
                 "comando2"
             ]
