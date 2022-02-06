@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import subprocess
-from json import load, loads, dumps
+from json import load, loads, dumps, JSONDecodeError
 from os import geteuid, path
 from sys import argv
 from string import Template
@@ -351,12 +351,16 @@ def comprobar_configuracion (archivo):
 
 # Funcion que se encarga de convertir a json los datos del archivo y definir su comportamiento
 def configuracion_archivo ( archivo ):
-    json=load(archivo)#Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
+    try:
+        json=load(archivo)#Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
 
-    if type(json) is list: #Si json es una lista llama directamente a renderizar_variables
-        renderizar_variables(json) # A la funcion le pasa unicamente el json, los demas parametros tendran un valor nulo
-    elif type (json) is dict: # En caso de ser un diccionario se llama a la funcion para comprobar su configuracion
-        comprobar_configuracion (json)
+        if type(json) is list: #Si json es una lista llama directamente a renderizar_variables
+            renderizar_variables(json) # A la funcion le pasa unicamente el json, los demas parametros tendran un valor nulo
+        elif type (json) is dict: # En caso de ser un diccionario se llama a la funcion para comprobar su configuracion
+            comprobar_configuracion (json)
+    except JSONDecodeError as fichero: #En caso de que este vacio o el formato sea incorrecto
+        print(Colores.ROJO+"Error, el archivo "+Colores.VERDE+archivo.name+Colores.ROJO+", esta vacio o tiene un formato erroneo"+Colores.FINC) # Mensaje error
+        funcion_error(1) #Funcion que determina el comportamiento del codigo en un error
 
 # Funcion encargada de recorrer los archivos pasados por parametro
 def comprobador_archivos(listado_archivos):
