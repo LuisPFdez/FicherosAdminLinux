@@ -89,7 +89,7 @@ sistema_paquetes = {
     "arch": {
         "instalar": ["pacman", "-S", "--noconfirm"],
         "comprobar": ["pacman", "-Qi"]
-    },
+    }
 }
 
 # Diccionario para almacenar los parametros del fichero de configuracion
@@ -126,21 +126,35 @@ def instalar(nombre_paquete):
             error.returncode == 100
         ):  # Si el codigo es 100 muestra un mensaje indicando que el paquete no existe
             print(
-                "El paquete "
+                Colores.ROJO
+                + "El paquete "
                 + Colores.AMARILLO
                 + nombre_paquete
                 + Colores.FINC
                 + " no existe"
             )
-            tipo_error.instalar(1)
+            tipo_error.instalar(100)
         else:  # En caso contrario muestra un mensaje de error y el codigo que ha devuelto
             print(
                 Colores.ROJO
-                + "Error al instalar, codigo devuelto devuelto: "
+                + "Error al instalar, codigo devuelto: "
                 + str(error.returncode)
                 + Colores.FINC
             )
-            tipo_error.instalar(1)
+            tipo_error.instalar(127)
+    except Exception as error:
+        # En caso de haber algun tipo de error diferente
+        print(
+            Colores.ROJO
+            + "Error al ejecutar al instalar el paquete: ("
+            + Colores.AMARILLO
+            + nombre_paquete
+            + ")"
+            + Colores.ROJO
+            + str(error)
+            + Colores.FINC
+        )
+        tipo_error.instalar(127)
 
 
 # Comprueba que un paquete no este instalado, con dpkg -s
@@ -659,7 +673,7 @@ def comprobador_archivos(listado_archivos):
 
 # Si el modulo es el principal
 if __name__ == "__main__":
-    archivos = ["pruebas.json"]  # Por defecto el archivo de configuarion es config.json
+    archivos = ["config.json"]  # Por defecto el archivo de configuarion es config.json
 
     if len(argv) >= 2:  # Comprueba si se ha introducido algun elemento por parametro
         archivos = argv[
