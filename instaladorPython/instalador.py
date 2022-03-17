@@ -19,8 +19,8 @@ class Plantilla(Template):
     # Fija el patron para renderizar una variable
     pattern = r"""
         \$(?:
-        (?P<escaped>\\\\)               | # Evita el caracter de escape
-        (?P<named>(?!))                 | # Evita la renderizar la variable que no esta entre llaves
+        (?P<escaped>$\\\\{)               | # Evita el caracter de escape
+        (?P<named>(?!))                   | # Evita la renderizar la variable que no esta entre llaves
         \{(?P<braced>[A-Z_][A-Z_\-\d]+)\} | # Renderiza variable entre llaves
         (?P<invalid>)
     )"""
