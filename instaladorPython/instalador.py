@@ -146,7 +146,7 @@ def instalar(nombre_paquete):
         # En caso de haber algun tipo de error diferente
         print(
             Colores.ROJO
-            + "Error al ejecutar al instalar el paquete: ("
+            + "Error al instalar el paquete: ("
             + Colores.AMARILLO
             + nombre_paquete
             + ")"
@@ -597,7 +597,16 @@ def configuracion_archivo(archivo):
 
         if (
             type(json) is list
-        ):  # Si json es una lista llama directamente a renderizar_variables
+        ):
+            global paquete #Indica que paquete es una variable global
+            #Si el sistema paquete no esta definido lo carga de forma automatica
+            if paquete is None:
+                # Ejecuta la funcion cargar_paquete y guarda lo que devuelve en la variable paquete
+                paquete = (
+                    cargar_paquete()
+                )  # Carga el paquete a traves del paquete distro
+
+            # Si json es una lista llama directamente a renderizar_variables
             renderizar_variables(
                 json
             )  # A la funcion le pasa unicamente el json, los demas parametros tendran un valor nulo
