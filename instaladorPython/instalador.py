@@ -130,8 +130,9 @@ def instalar(nombre_paquete):
                 + "El paquete "
                 + Colores.AMARILLO
                 + nombre_paquete
-                + Colores.FINC
+                + Colores.ROJO
                 + " no existe"
+                + Colores.FINC
             )
             tipo_error.instalar(100)
         else:  # En caso contrario muestra un mensaje de error y el codigo que ha devuelto
@@ -140,6 +141,7 @@ def instalar(nombre_paquete):
                 + "Error al instalar el paquete "
                 + Colores.AMARILLO
                 + nombre_paquete
+                + Colores.ROJO
                 + ", codigo devuelto: "
                 + str(error.returncode)
                 + Colores.FINC
@@ -251,6 +253,7 @@ def comprobar_comando(comando):
             + "Error ("
             + Colores.AMARILLO
             + comando
+            + Colores.ROJO
             + "), el codigo de salida del comando ha de ser un numero"
             + Colores.FINC
         )
@@ -283,6 +286,7 @@ def ejecutar_comando(comando):
             + "Error al ejecutar el comando ("
             + Colores.AMARILLO
             + comando
+            + Colores.ROJO
             + ") , codigo devuelto devuelto: "
             + str(error.returncode)
             + Colores.FINC
