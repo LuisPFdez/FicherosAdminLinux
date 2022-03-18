@@ -137,7 +137,10 @@ def instalar(nombre_paquete):
         else:  # En caso contrario muestra un mensaje de error y el codigo que ha devuelto
             print(
                 Colores.ROJO
-                + "Error al instalar, codigo devuelto: "
+                + "Error al instalar el paquete "
+                + Colores.AMARILLO
+                + nombre_paquete
+                + ", codigo devuelto: "
                 + str(error.returncode)
                 + Colores.FINC
             )
@@ -245,7 +248,10 @@ def comprobar_comando(comando):
     except ValueError as error:  # En caso de que el codigo de salida no sea un número
         print(
             Colores.ROJO
-            + "Error, el codigo de salida del comando ha de ser un numero"
+            + "Error ("
+            + Colores.AMARILLO
+            + comando
+            + "), el codigo de salida del comando ha de ser un numero"
             + Colores.FINC
         )
         tipo_error.comprobar_comando(
@@ -274,7 +280,10 @@ def ejecutar_comando(comando):
     ) as error:  # Captura la excepcion de subprocess y muesta un mensaje y el codigo que devuelve
         print(
             Colores.ROJO
-            + "Error al ejecutar el comando, codigo devuelto devuelto: "
+            + "Error al ejecutar el comando ("
+            + Colores.AMARILLO
+            + comando
+            + ") , codigo devuelto devuelto: "
             + str(error.returncode)
             + Colores.FINC
         )
@@ -595,11 +604,9 @@ def configuracion_archivo(archivo):
             archivo
         )  # Genera un dicionario y con el contenido del archivo y lo almacena en una variable json
 
-        if (
-            type(json) is list
-        ):
-            global paquete #Indica que paquete es una variable global
-            #Si el sistema paquete no esta definido lo carga de forma automatica
+        if type(json) is list:
+            global paquete  # Indica que paquete es una variable global
+            # Si el sistema paquete no esta definido lo carga de forma automatica
             if paquete is None:
                 # Ejecuta la funcion cargar_paquete y guarda lo que devuelve en la variable paquete
                 paquete = (
