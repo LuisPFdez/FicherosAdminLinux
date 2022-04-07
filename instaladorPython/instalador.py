@@ -19,7 +19,7 @@ class Plantilla(Template):
     # Fija el patron para renderizar una variable
     pattern = r"""
         \$(?:
-        (?P<escaped>$\\\\{)               | # Evita el caracter de escape
+        (?P<escaped>\\\\)               | # Evita el caracter de escape
         (?P<named>(?!))                   | # Evita la renderizar la variable que no esta entre llaves
         \{(?P<braced>[A-Z_][A-Z_\-\d]+)\} | # Renderiza variable entre llaves
         (?P<invalid>)
@@ -706,7 +706,7 @@ def comprobador_archivos(listado_archivos):
 
 # Si el modulo es el principal
 if __name__ == "__main__":
-    archivos = ["config.json"]  # Por defecto el archivo de configuarion es config.json
+    archivos = ["/home/ubuntu/Documentos/FicherosAdminLinux/instaladorPython/index.json"]  # Por defecto el archivo de configuarion es config.json
 
     if len(argv) >= 2:  # Comprueba si se ha introducido algun elemento por parametro
         archivos = argv[
